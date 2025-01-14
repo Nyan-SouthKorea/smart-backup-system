@@ -18,7 +18,7 @@ class Auto_backup:
         self.backup_path = self.path_nor(backup_path)
 
         # 조건 상관 없이 무조건 백업하는 파일 포맷
-        self.must_copy = {'pt', 'onnx', 'rknn'}
+        self.must_copy = {'pt', 'onnx', 'rknn', 'pst'} # 모델, 아웃룩
 
         # 데이터셋으로 인정할 확장자 입력
         dataset_formats = {'jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff', 'webp', 'mp3', 'wav'}
@@ -108,7 +108,11 @@ class Auto_backup:
         '''
         for data, file_name in zip([self.big_file_list, self.is_file_big_error_list, self.dataset_folder_list, self.is_dataset_error_list, self.auto_backup_error_list], 
                                    ['big_file_list', 'is_file_big_error_list', 'dataset_folder_list', 'is_dataset_error_list', 'auto_backup_error_list']):
-            self.make_json(f'{self.backup_path}/log/{file_name}.json', data)
+            try:
+                self.make_json(f'{self.backup_path}/log/{file_name}.json', data)
+            except Exception as e:
+                print(f'log save error:{file_name}')
+                continue
 
     def path_nor(self, path):
         norm_path = os.path.normpath(path)
@@ -173,6 +177,7 @@ class Auto_backup:
         '''
         total_cnt = self.make_folders_and_count()
         start = time.time()
+        total_timer = time.time()
         for cnt, (root, dirs, files) in enumerate(os.walk(self.source_path)):
             root = self.path_nor(root)            
             # 백업 경로는 백업에서 제외
@@ -202,6 +207,7 @@ class Auto_backup:
                 print(f'completed: {cnt}/{total_cnt}')
                 start = time.time()
         self.save_log()            
+        print(f'Spend Time(sec): {int(time.time() - total_timer)}')
     
 
     
