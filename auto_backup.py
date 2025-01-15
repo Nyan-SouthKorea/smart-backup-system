@@ -18,7 +18,10 @@ class Auto_backup:
         self.backup_path = self.path_nor(backup_path)
 
         # 조건 상관 없이 무조건 백업하는 파일 포맷
-        self.must_copy = {'pt', 'onnx', 'rknn', 'pst'} # 모델, 아웃룩
+        self.must_copy = {'pst'} # 아웃룩
+
+        # 조건 상관 없이 무조건 백업 안하는 파일 포맷
+        self.do_not_copy = {'pt', 'onnx', 'rknn'} # 모델 웨이트 파일 유출 방지
 
         # 데이터셋으로 인정할 확장자 입력
         dataset_formats = {'jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff', 'webp', 'mp3', 'wav'}
@@ -194,6 +197,10 @@ class Auto_backup:
             # 파일 하나씩 백업
             for file in files:
                 try:
+                    # 무조건 건너뛰는 파일 확인
+                    if file.split('.')[-1] in self.do_not_copy:
+                        continue
+                    
                     # 파일이 너무 크면 건너뛰기
                     if self.is_file_big(f'{root}/{file}') == True and not file in self.must_copy:
                         continue
